@@ -1,4 +1,7 @@
-require('dotenv').config(); // Wczytuje zmienne środowiskowe z .env
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
+
 const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
@@ -9,8 +12,10 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 
 console.log('DATABASE_URL:', process.env.DATABASE_URL);
+if (!process.env.DATABASE_URL) {
+  console.error('❌ Brak DATABASE_URL! Upewnij się, że zmienna jest ustawiona w Render');
+}
 
-// Konfiguracja połączenia z Supabase przez DATABASE_URL
 const db = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
@@ -18,13 +23,10 @@ const db = new Pool({
   }
 });
 
-
-// Sprawdzenie połączenia
 db.connect()
   .then(() => console.log('✅ Połączono z bazą Supabase!'))
   .catch((err) => console.error('❌ Błąd połączenia z bazą:', err.message));
 
-// Endpoint: najnowszy kurs
 app.get('/', async (req, res) => {
   try {
     const result = await db.query('SELECT * FROM rozmowy LIMIT 1');
@@ -38,8 +40,6 @@ app.get('/', async (req, res) => {
   }
 });
 
-
-// Endpoint: wszystkie kursy
 app.get('/rozmowy', async (req, res) => {
   try {
     const result = await db.query('SELECT data_rozmowy, godzina FROM rozmowy');
