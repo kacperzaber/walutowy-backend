@@ -10,6 +10,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors());
+console.log('🧪 process.env:', process.env);
 
 console.log('DATABASE_URL:', process.env.DATABASE_URL);
 if (!process.env.DATABASE_URL) {
