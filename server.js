@@ -1,3 +1,4 @@
+require('dotenv').config(); // Wczytuje zmienne środowiskowe z .env
 const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
@@ -7,26 +8,26 @@ const port = process.env.PORT || 3000;
 
 app.use(cors());
 
-// Połączenie z Supabase (PostgreSQL)
+console.log('DATABASE_URL:', process.env.DATABASE_URL);
+
+// Konfiguracja połączenia z Supabase przez DATABASE_URL
 const db = new Pool({
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT || 5432,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASS,
-  database: process.env.DB_NAME,
+  connectionString: process.env.DATABASE_URL,
   ssl: {
-    rejectUnauthorized: false, // WAŻNE dla Supabase!
-  },
+    rejectUnauthorized: false
+  }
 });
 
-db.connect()
-  .then(() => console.log('✅ Połączono z bazą danych Supabase!'))
-  .catch((err) => console.error('❌ Błąd połączenia z bazą danych:', err.message));
 
-// Endpoint: /kurs (najświeższy kurs)
-app.get('/kurs', async (req, res) => {
+// Sprawdzenie połączenia
+db.connect()
+  .then(() => console.log('✅ Połączono z bazą Supabase!'))
+  .catch((err) => console.error('❌ Błąd połączenia z bazą:', err.message));
+
+// Endpoint: najnowszy kurs
+app.get('/', async (req, res) => {
   try {
-    const result = await db.query('SELECT kurs, updated_at FROM kurs ORDER BY updated_at DESC LIMIT 1');
+    const result = await db.query('SELECT * FROM rozmowy LIMIT 1');
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Brak danych' });
     }
@@ -37,10 +38,11 @@ app.get('/kurs', async (req, res) => {
   }
 });
 
-// Endpoint: /kursy – wszystkie kursy
-app.get('/kursy', async (req, res) => {
+
+// Endpoint: wszystkie kursy
+app.get('/rozmowy', async (req, res) => {
   try {
-    const result = await db.query('SELECT kurs AS wartosc, updated_at AS data FROM kurs ORDER BY updated_at DESC');
+    const result = await db.query('SELECT data_rozmowy, godzina FROM rozmowy');
     res.json(result.rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -48,5 +50,5 @@ app.get('/kursy', async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`🚀 API działa na porcie ${port}`);
+  console.log(`🚀 Serwer działa na porcie ${port}`);
 });
