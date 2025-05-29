@@ -16,17 +16,12 @@ console.log('DATABASE_URL:', process.env.DATABASE_URL);
 if (!process.env.DATABASE_URL) {
   console.error('❌ Brak DATABASE_URL! Upewnij się, że zmienna jest ustawiona w Render');
 }
+dns.setDefaultResultOrder('ipv4first');
+
 const db = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false },
-  host: 'db.sfxsilokeqajowtmnhvx.supabase.co', // jawnie host
-  port: 5432,
-  user: 'postgres',
-  password: 'Nypj7vo9354416',
-  database: 'postgres',
-  // ewentualnie wymuś IPv4, np. przez ustawienie NODE_OPTIONS lub DNS
+  ssl: { rejectUnauthorized: false }
 });
-
 
 db.connect()
   .then(() => console.log('✅ Połączono z bazą Supabase!'))
