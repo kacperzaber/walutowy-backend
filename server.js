@@ -16,7 +16,7 @@ console.log('DATABASE_URL:', process.env.DATABASE_URL);
 if (!process.env.DATABASE_URL) {
   console.error('❌ Brak DATABASE_URL! Upewnij się, że zmienna jest ustawiona w Render');
 }
-dns.setDefaultResultOrder('ipv4first');
+
 
 const db = new Pool({
   connectionString: process.env.DATABASE_URL,
